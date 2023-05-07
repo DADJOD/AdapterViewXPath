@@ -51,20 +51,14 @@ class MainActivity : AppCompatActivity() {
                     val dob = saint.childNodes.item(1).textContent
                     val dod = saint.childNodes.item(2).textContent
                     val s = Saint(name, dob, dod, 0f)
-                    
-
-//                    val name = saint.firstChild.textContent
-//                    val dob = saint.childNodes.item(1).textContent
-//                    val dod = saint.childNodes.item(2).textContent
-//                    val s = Saint(name, dob, dod, 0f)
-//                    saints.add(s)
-//                    Log.d("happy", "name: $name")
+                    saints.add(s)
+                    Log.d("happySDK", "name: $name")
                 }
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
         }
         adapter = SaintAdapter(this, R.layout.listviewitem, saints)
-        list!!.setAdapter(adapter)
+        list!!.adapter = adapter
     }
 
     // Вызывается при создании контекстного меню
