@@ -1,5 +1,6 @@
 package com.example.adapterviewxpath
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextMenu
@@ -7,6 +8,7 @@ import android.view.ContextMenu.ContextMenuInfo
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
 import android.widget.AdapterView.AdapterContextMenuInfo
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +17,7 @@ import org.xml.sax.InputSource
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private var list: ListView? = null
     private val saints: MutableList<Saint> = ArrayList()
@@ -40,25 +42,25 @@ class MainActivity : AppCompatActivity() {
         try {
             // Результат XPath запроса - набор узлов
             nodes = xPath.evaluate(expression, mySaints, XPathConstants.NODESET) as NodeList
-            if (nodes != null) {
-                val numSaints = nodes.length
-                // Для каждого из узлов
-                for (i in 0 until numSaints) {
-                    // Узел
-                    val saint = nodes.item(i)
-                    ///
-                    val name = saint.firstChild.textContent
-                    val dob = saint.childNodes.item(1).textContent
-                    val dod = saint.childNodes.item(2).textContent
-                    val s = Saint(name, dob, dod, 0f)
-                    saints.add(s)
-                    Log.d("happySDK", "name: $name")
-                }
+            val numSaints = nodes.length
+            // Для каждого из узлов
+            for (i in 0 until numSaints) {
+                // Узел
+                val saint = nodes.item(i)
+                ///
+                val name = saint.firstChild.textContent
+                val dob = saint.childNodes.item(1).textContent
+                val dod = saint.childNodes.item(2).textContent
+                val s = Saint(name, dob, dod, 0f)
+                saints.add(s)
+                Log.d("happySDK", "name: $name")
             }
         } catch (_: Exception) {
         }
         adapter = SaintAdapter(this, R.layout.listviewitem, saints)
         list!!.adapter = adapter
+
+        list!!.onItemClickListener = this
     }
 
     // Вызывается при создании контекстного меню
@@ -94,5 +96,31 @@ class MainActivity : AppCompatActivity() {
         const val SAINT_ID = "SAINT_ID"
         const val SAINT_RATING = "SAINT_RATING"
         const val RATING_REQUEST = 777
+    }
+
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        val intent = Intent(this, SaintDetail::class.java)
+
+        val s = saints[position]
+        intent.putExtra(SAINT_NAME, s.name)
+        intent.putExtra(SAINT_ID, position)
+        intent.putExtra(SAINT_RATING, s.rating)
+
+        startActivityForResult(intent, RATING_REQUEST)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == RATING_REQUEST) {
+            val rating = data?.getFloatExtra(SAINT_RATING, -1f)
+            val id     = data?.getIntExtra(SAINT_ID, -1)
+
+            if (rating!! >= 0 && id!! >= 0) {
+                val s = saints[id]
+                s.rating = rating
+                adapter!!.notifyDataSetChanged()
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

@@ -17,36 +17,41 @@ class SaintAdapter(context: Context, resource: Int, private val saints: List<Sai
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-//        var convertView = convertView
+        var convertView = convertView
         val saint = saints[position]
-        val holder: Holder
+        var holder: Holder
 
         if (convertView == null) {
             val inflater = LayoutInflater.from(parent.context)
-            val convertView = inflater.inflate(R.layout.listviewitem, parent, false)
+            convertView = inflater.inflate(R.layout.listviewitem, parent, false)
             holder = Holder()
-            
-            val name = convertView.findViewById(R.id.text) as TextView
-            val dob = convertView.findViewById(R.id.dob) as TextView
-            val dod = convertView.findViewById(R.id.dod) as TextView
-            val rating = convertView.findViewById(R.id.rating) as RatingBar
-            val threedots = convertView.findViewById(R.id.threedots) as ImageView
+
+            holder.name = convertView.findViewById(R.id.text) as TextView
+            holder.dob = convertView.findViewById(R.id.dob) as TextView
+            holder.dod = convertView.findViewById(R.id.dod) as TextView
+            holder.rating = convertView.findViewById(R.id.rating) as RatingBar
+            holder.threedots = convertView.findViewById(R.id.threedots) as ImageView
+
+            convertView.tag = holder
+            Log.d("happySDK2","inflater.inflate")
         }
 
-        holder.name?.text = saint.name
-        dob.text = saint.dob
-        dod.text = saint.dod
-        rating.rating = saint.rating
+        holder = convertView!!.tag as Holder
+
+        holder.name!!.text = saint.name
+        holder.dob!!.text = saint.dob
+        holder.dod!!.text = saint.dod
+        holder.rating!!.rating = saint.rating
 
         return convertView
     }
 
-    class Holder() {
-        val name: TextView? = null
-        val dob: TextView? = null
-        val dod: TextView? = null
-        val rating: RatingBar? = null
-        val threedots: ImageView? = null
+    private class Holder {
+        var name: TextView? = null
+        var dob: TextView? = null
+        var dod: TextView? = null
+        var rating: RatingBar? = null
+        var threedots: ImageView? = null
     }
 }
 
