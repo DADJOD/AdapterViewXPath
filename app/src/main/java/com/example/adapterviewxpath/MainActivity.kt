@@ -1,5 +1,7 @@
 package com.example.adapterviewxpath
 
+import android.annotation.SuppressLint
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +12,9 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.AdapterView.AdapterContextMenuInfo
+import android.widget.EditText
 import android.widget.ListView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
@@ -19,6 +23,7 @@ import java.util.Collections.*
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
+@Suppress("NAME_SHADOWING")
 class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     private var list: ListView? = null
@@ -59,6 +64,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             }
         } catch (_: Exception) {
         }
+        saints.sort()
+
         adapter = SaintAdapter(this, R.layout.listviewitem, saints)
         list!!.adapter = adapter
 
@@ -90,7 +97,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_add -> {
-
+                showAddDialog()
                 true
             }
 
@@ -101,13 +108,38 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             }
 
             R.id.menu_down -> {
-                sort(saints, reverseOrder())
+//                sort(saints, reverseOrder())
+                saints.reverse()
                 adapter!!.notifyDataSetChanged()
                 true
             }
 
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    @SuppressLint("InflateParams", "MissingInflatedId")
+    private fun showAddDialog() {
+        val dialog  = layoutInflater.inflate(R.layout.dialog_add, null)
+        val text    = dialog.findViewById(R.id.dialog_add) as EditText
+        val builder = AlertDialog.Builder(this)
+
+        builder
+            .setView(dialog)
+            .setTitle("Add a Saint")
+            .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, _ ->
+                dialog.cancel()
+            })
+            .setPositiveButton("Create", DialogInterface.OnClickListener { dialog, _ ->
+                val name = text.text.toString()
+                saints.add(
+                    Saint(name, "", "", 0f)
+                )
+                adapter?.notifyDataSetChanged()
+                dialog.dismiss()
+            })
+            .create()
+            .show()
     }
 
     companion object {
@@ -133,7 +165,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == RATING_REQUEST) {
             val rating = data?.getFloatExtra(SAINT_RATING, -1f)
-            val id     = data?.getIntExtra(SAINT_ID, -1)
+            val id = data?.getIntExtra(SAINT_ID, -1)
 
             if (rating!! >= 0 && id!! >= 0) {
                 val s = saints[id]
