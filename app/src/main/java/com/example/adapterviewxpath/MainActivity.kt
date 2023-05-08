@@ -1,7 +1,6 @@
 package com.example.adapterviewxpath
 
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -18,13 +17,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
-import java.util.Collections
 import java.util.Collections.*
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
-@Suppress("NAME_SHADOWING")
-class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
+@Suppress("NAME_SHADOWING", "DEPRECATION")
+class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener,
+    AdapterView.OnItemLongClickListener {
 
     private var list: ListView? = null
     private val saints: MutableList<Saint> = ArrayList()
@@ -69,6 +68,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         list!!.adapter = adapter
 
         list!!.onItemClickListener = this
+
+        list!!.onItemLongClickListener = this
     }
 
     // Вызывается при создании контекстного меню
@@ -78,18 +79,22 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     // Вызывается при выборе элемента контекстного меню
-    override fun onContextItemSelected(item: MenuItem): Boolean {
-        val info = item.menuInfo as AdapterContextMenuInfo?
-        ///
-        return super.onContextItemSelected(item)
-    }
+//    override fun onContextItemSelected(item: MenuItem): Boolean {
+//        val info = item.menuInfo as AdapterContextMenuInfo?
+//        ///
+//        return super.onContextItemSelected(item)
+//    }
 
     // Вызывается при создании меню
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.main, menu)
+        if (adapter!!.hasSelected()) {
+            menuInflater.inflate(R.menu.delete, menu)
+        } else {
+            menuInflater.inflate(R.menu.main, menu)
+        }
 
-        return true
+        return super.onCreateOptionsMenu(menu)
+
     }
 
     // Вызывается при выборе элемента меню
@@ -113,6 +118,12 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 true
             }
 
+            R.id.main_delete -> {
+                adapter!!.deleteSelected()
+                invalidateOptionsMenu()
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -126,17 +137,17 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         builder
             .setView(dialog)
             .setTitle("Add a Saint")
-            .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialog, _ ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.cancel()
-            })
-            .setPositiveButton("Create", DialogInterface.OnClickListener { dialog, _ ->
+            }
+            .setPositiveButton("Create") { dialog, _ ->
                 val name = text.text.toString()
                 saints.add(
                     Saint(name, "", "", 0f)
                 )
                 adapter?.notifyDataSetChanged()
                 dialog.dismiss()
-            })
+            }
             .create()
             .show()
     }
@@ -151,14 +162,19 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        val intent = Intent(this, SaintDetail::class.java)
+        if (!adapter!!.hasSelected()) {
+            val intent = Intent(this, SaintDetail::class.java)
 
-        val s = saints[position]
-        intent.putExtra(SAINT_NAME, s.name)
-        intent.putExtra(SAINT_ID, position)
-        intent.putExtra(SAINT_RATING, s.rating)
+            val s = saints[position]
+            intent.putExtra(SAINT_NAME, s.name)
+            intent.putExtra(SAINT_ID, position)
+            intent.putExtra(SAINT_RATING, s.rating)
 
-        startActivityForResult(intent, RATING_REQUEST)
+            startActivityForResult(intent, RATING_REQUEST)
+        } else {
+            toggleSelection(position)
+        }
+
     }
 
     @Deprecated("Deprecated in Java")
@@ -175,5 +191,20 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             return
         }
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onItemLongClick(
+        parent: AdapterView<*>?,
+        view: View?,
+        position: Int,
+        id: Long
+    ): Boolean {
+        toggleSelection(position)
+        return true
+    }
+
+    private fun toggleSelection(position: Int) {
+        adapter!!.toggleSelection(position)
+        invalidateOptionsMenu()
     }
 }

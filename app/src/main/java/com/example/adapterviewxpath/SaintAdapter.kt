@@ -10,13 +10,65 @@ import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
+import java.util.Collections
 
 
 @Suppress("NAME_SHADOWING")
 class SaintAdapter(context: Context, resource: Int, private val saints: MutableList<Saint>) :
     ArrayAdapter<Saint>(context, resource) {
+
+    private val selection = HashSet<Int>()
+
     override fun getCount(): Int {
         return saints.size
+    }
+
+    override fun getViewTypeCount(): Int {
+        return 2
+    }
+
+    private fun isSelected(position: Int): Boolean {
+        return selection.contains(position)
+    }
+
+    fun toggleSelection(position: Int) {
+        if (isSelected(position)) {
+            selection.remove(position)
+        } else {
+            selection.add(position)
+        }
+        notifyDataSetChanged()
+    }
+
+    fun deleteSelected() {
+        val items = ArrayList<Int>()
+        items.addAll(selection)
+
+        Collections.sort(items, Collections.reverseOrder())
+
+        for (i in items) {
+            selection.remove(i)
+            saints.removeAt(i)
+        }
+        notifyDataSetChanged()
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return if (isSelected(position)) {
+            1
+        } else {
+            0
+        }
+
+//        if (isSelected(position)) {
+//            return 1
+//        } else {
+//            return 0
+//        }
+    }
+
+    fun hasSelected(): Boolean {
+        return selection.isNotEmpty()
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -26,7 +78,19 @@ class SaintAdapter(context: Context, resource: Int, private val saints: MutableL
 
         if (convertView == null) {
             val inflater = LayoutInflater.from(parent.context)
-            convertView = inflater.inflate(R.layout.listviewitem, parent, false)
+
+            convertView = if (isSelected(position)) {
+                inflater.inflate(R.layout.listviewitemselected, parent, false)
+            } else {
+                inflater.inflate(R.layout.listviewitem, parent, false)
+            }
+
+//            if (isSelected(position)) {
+//                convertView = inflater.inflate(R.layout.listviewitemselected, parent, false)
+//            } else {
+//                convertView = inflater.inflate(R.layout.listviewitem, parent, false)
+//            }
+
             holder = Holder()
 
             holder.name = convertView.findViewById(R.id.text) as TextView
@@ -34,6 +98,13 @@ class SaintAdapter(context: Context, resource: Int, private val saints: MutableL
             holder.dod = convertView.findViewById(R.id.dod) as TextView
             holder.rating = convertView.findViewById(R.id.rating) as RatingBar
             holder.threedots = convertView.findViewById(R.id.threedots) as ImageView
+
+            if (hasSelected()) {
+                holder.threedots.visibility = View.INVISIBLE
+            } else {
+                holder.threedots.visibility = View.VISIBLE
+            }
+
 
             convertView.tag = holder
             Log.d("happySDK2","inflater.inflate")
