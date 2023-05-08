@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             for (i in 0 until numSaints) {
                 // Узел
                 val saint = nodes.item(i)
-                ///
                 val name = saint.firstChild.textContent
                 val dob = saint.childNodes.item(1).textContent
                 val dod = saint.childNodes.item(2).textContent
@@ -120,8 +119,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     @SuppressLint("InflateParams", "MissingInflatedId")
     private fun showAddDialog() {
-        val dialog  = layoutInflater.inflate(R.layout.dialog_add, null)
-        val text    = dialog.findViewById(R.id.dialog_add) as EditText
+        val dialog = layoutInflater.inflate(R.layout.dialog_add, null)
+        val text = dialog.findViewById(R.id.dialog_add) as EditText
         val builder = AlertDialog.Builder(this)
 
         builder
@@ -162,6 +161,7 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         startActivityForResult(intent, RATING_REQUEST)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == RATING_REQUEST) {
             val rating = data?.getFloatExtra(SAINT_RATING, -1f)

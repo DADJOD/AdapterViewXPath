@@ -9,8 +9,11 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
 
-class SaintAdapter(context: Context, resource: Int, private val saints: List<Saint>) :
+
+@Suppress("NAME_SHADOWING")
+class SaintAdapter(context: Context, resource: Int, private val saints: MutableList<Saint>) :
     ArrayAdapter<Saint>(context, resource) {
     override fun getCount(): Int {
         return saints.size
@@ -38,20 +41,55 @@ class SaintAdapter(context: Context, resource: Int, private val saints: List<Sai
 
         holder = convertView!!.tag as Holder
 
-        holder.name!!.text = saint.name
-        holder.dob!!.text = saint.dob
-        holder.dod!!.text = saint.dod
-        holder.rating!!.rating = saint.rating
-
+        holder.name.text = saint.name
+        holder.dob.text = saint.dob
+        holder.dod.text = saint.dod
+        holder.rating.rating = saint.rating
+        holder.threedots.setOnClickListener {
+            showPopup(it, position)
+        }
         return convertView
     }
 
+    private fun showPopup(view: View, position: Int) {
+        val popupMenu = PopupMenu(view.context, view)
+        popupMenu.inflate(R.menu.context)
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.context_delete -> {
+                    saints.removeAt(position)
+                    notifyDataSetChanged()
+                    return@setOnMenuItemClickListener true
+                }
+
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+//        popupMenu
+//            .setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
+//                when (item.itemId) {
+//                    R.id.context_delete -> {
+//                        selection.remove(position)
+//                        data.remove(position)
+//                        notifyDataSetChanged()
+//                        return@OnMenuItemClickListener true
+//                    }
+//                }
+//                false
+//            })
+//        popupMenu.show()
+//
+//    }
+
     private class Holder {
-        var name: TextView? = null
-        var dob: TextView? = null
-        var dod: TextView? = null
-        var rating: RatingBar? = null
-        var threedots: ImageView? = null
+        lateinit var name: TextView
+        lateinit var dob: TextView
+        lateinit var dod: TextView
+        lateinit var rating: RatingBar
+        lateinit var threedots: ImageView
     }
 }
 
