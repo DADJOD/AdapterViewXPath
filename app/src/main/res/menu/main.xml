@@ -2,16 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
-    <item android:id="@+id/menu.add" android:title="Add"
+    <item
+        android:id="@+id/menu.add"
         android:icon="@drawable/ic_add_black_24dp"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/add"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/menu.up" android:title="Ascending"
+    <item
+        android:id="@+id/menu.up"
         android:icon="@drawable/ic_arrow_upward_black_24dp"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/ascending"
+        app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/menu.down" android:title="Descending"
+    <item
+        android:id="@+id/menu.down"
         android:icon="@drawable/ic_arrow_downward_black_24dp"
-        app:showAsAction="ifRoom"/>
+        android:title="@string/descending"
+        app:showAsAction="ifRoom" />
 </menu>

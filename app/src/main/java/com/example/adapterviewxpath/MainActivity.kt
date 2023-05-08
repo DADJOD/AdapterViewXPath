@@ -14,6 +14,8 @@ import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
+import java.util.Collections
+import java.util.Collections.*
 import javax.xml.xpath.XPathConstants
 import javax.xml.xpath.XPathFactory
 
@@ -78,15 +80,34 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
 
     // Вызывается при создании меню
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        ///
-        return super.onCreateOptionsMenu(menu)
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.main, menu)
+
+        return true
     }
 
     // Вызывается при выборе элемента меню
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
+        return when (item.itemId) {
+            R.id.menu_add -> {
+
+                true
+            }
+
+            R.id.menu_up -> {
+                saints.sort()
+                adapter!!.notifyDataSetChanged()
+                true
+            }
+
+            R.id.menu_down -> {
+                sort(saints, reverseOrder())
+                adapter!!.notifyDataSetChanged()
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     companion object {
@@ -119,8 +140,8 @@ class MainActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                 s.rating = rating
                 adapter!!.notifyDataSetChanged()
             }
+            return
         }
-
         super.onActivityResult(requestCode, resultCode, data)
     }
 }
